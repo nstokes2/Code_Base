@@ -73,11 +73,15 @@ public class ColladaParser {
     private int mPositionHandle;
     private int mColorHandle;
     private int mMVPMatrixHandle;
+    private int mMVMatrixHandle;
+    private int mNormalHandle;
+    private int mLightPosHandle;
+
 
     ArrayList<float[]> worlds = new ArrayList<float[]>();
 
 
-
+    private final float[] mVMatrix = new float[16];
     private final float[] modelMatrix = new float[16];
 
     private final float[] mVPMatrix = new float[16];
@@ -90,19 +94,53 @@ public class ColladaParser {
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
             "uniform mat4 uMVPMatrix;" +
-                    "attribute vec4 vPosition;" +
+                    "uniform mat4 uMVMatrix;" +
+                    "uniform vec4 uColor;"+
+                    "attribute vec3 aNormal;"+
+                    "attribute vec4 aPosition;" +
+
+
+                    "varying vec3 vPosition;" +
+                    "varying vec3 vNormal;" +
+                    "varying vec4 vColor;" +
                     "void main() {" +
+                    "vPosition = vec3(uMVMatrix * aPosition);" +
+                    "vColor = uColor;" +
+                    "vNormal = vec3(uMVMatrix * vec4(aNormal, 0.0));" +
+
+
                     // the matrix must be included as a modifier of gl_Position
                     // Note that the uMVPMatrix factor *must be first* in order
                     // for the matrix multiplication product to be correct.
-                    "  gl_Position = uMVPMatrix * vPosition;" +
+                    "  gl_Position = uMVPMatrix * aPosition;" +
                     "}";
 
     private final String fragmentShaderCode =
             "precision mediump float;" +
-                    "uniform vec4 vColor;" +
+                    "uniform vec3 lightPos;" +
+                    "varying vec4 vColor;" +
+
+                    "varying vec3 vPosition;" +
+                    "varying vec3 vNormal;"+
+
+
                     "void main() {" +
-                    "  gl_FragColor = vColor;" +
+                    "float distance = length(lightPos - vPosition);"+
+                    "vec3 lightVector = normalize(lightPos - vPosition);"+
+                    "float diffuse;" +
+    "if (gl_FrontFacing) {" +
+
+       " diffuse = max(dot(vNormal, lightVector), 0.0);" +
+    "} else {" +
+        "diffuse = max(dot(-vNormal, lightVector), 0.0);" +
+    "}"+
+                    "diffuse = diffuse * (1.0 / (1.0 + (0.10 * distance)));" +
+                    " diffuse = diffuse + 0.3; " +
+
+
+
+
+    "  gl_FragColor = (vColor * diffuse);" +
                     "}";
 
 
@@ -149,10 +187,10 @@ public class ColladaParser {
     float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
 
 
-    private static final String U_COLOR = "u_Color";
+    //private static final String U_COLOR = "u_Color";
     private int uColorLocation;
 
-    private static final String A_POSITION = "a_Position";
+   // private static final String A_POSITION = "a_Position";
 
     public void processTriangles(){
         int index = 0;
@@ -651,7 +689,7 @@ public class ColladaParser {
     public float getAngle2() {return mAngle2;}
     public void setAngle2(float angle) {mAngle2 = angle;}
 
-    public void draw(float[] mvpMatrix, float angle) {
+    public void draw(float[] mvpMatrix, float angle, float[] viewMatrix) {
         mAngle = angle;
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
@@ -660,33 +698,49 @@ public class ColladaParser {
 
         for (int i = 0; i < geometries.size(); i++)
             worlds.add(new   float[16]);
-        for (int i = 0; i < geometries.size(); i++)
-        {
-            Matrix.setIdentityM(identity, 0);
-            Matrix.translateM(identity, 0, geometries.get(i).translate[0], geometries.get(i).translate[1], geometries.get(i).translate[2]);
-            Matrix.multiplyMM(worlds.get(i), 0, identity, 0, modelMatrix, 0);
-            Matrix.multiplyMM(mVPMatrix, 0, mvpMatrix, 0, worlds.get(i), 0);
 
-
-        }
       //  Matrix.multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
 
 
         // get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "aPosition");
+        mLightPosHandle = GLES20.glGetUniformLocation(mProgram, "lightPos");
+        mNormalHandle = GLES20.glGetAttribLocation(mProgram, "aNormal");
+        mColorHandle = GLES20.glGetUniformLocation(mProgram, "uColor");
+        // get handle to shape's transformation matrix
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+       mMVMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVMatrix");
+
+
+
+
 
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
+        GLES20.glEnableVertexAttribArray(mNormalHandle);
 
         // Prepare the triangle coordinate data
         for(int i = 0; i < geometries.size(); i++) {
+            float[] temp = new float[16];
+            Matrix.setIdentityM(identity, 0);
+            Matrix.translateM(identity, 0, geometries.get(i).translate[0], geometries.get(i).translate[1], geometries.get(i).translate[2]);
+            Matrix.multiplyMM(worlds.get(i), 0, identity, 0, modelMatrix, 0);
+          //  Matrix.multiplyMM(temp, 0, modelMatrix, 0, worlds.get(i), 0);
+            Matrix.multiplyMM(mVMatrix, 0, worlds.get(i), 0, viewMatrix, 0);
+            Matrix.multiplyMM(mVPMatrix, 0, mvpMatrix, 0, worlds.get(i), 0);
             GLES20.glVertexAttribPointer(
                     mPositionHandle, 3,
                     GLES20.GL_FLOAT, false,
                     0, geometries.get(i).vertexBuffer);
 
-            // get handle to fragment shader's vColor member
-            mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+            GLES20.glVertexAttribPointer(
+                    mNormalHandle, 3,
+                    GLES20.GL_FLOAT, false,
+                    0, geometries.get(i).normalBuffer);
+
+
+
+
 
             // Set color for drawing the triangle
             if(i == 0)
@@ -716,10 +770,9 @@ public class ColladaParser {
 
            // GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 
-            // get handle to shape's transformation matrix
-            mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
-            MyGLRenderer.checkGlError("glGetUniformLocation");
 
+            GLES20.glUniformMatrix4fv(mMVMatrixHandle, 1, false, mVMatrix, 0);
+            GLES20.glVertexAttrib3f(mLightPosHandle, 0.0f, 50.0f, 0.0f);
             // Apply the projection and view transformation
             GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mVPMatrix, 0);
             MyGLRenderer.checkGlError("glUniformMatrix4fv");
