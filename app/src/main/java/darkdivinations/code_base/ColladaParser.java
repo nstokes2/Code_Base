@@ -128,13 +128,13 @@ public class ColladaParser {
                     "float distance = length(lightPos - vPosition);"+
                     "vec3 lightVector = normalize(lightPos - vPosition);"+
                     "float diffuse;" +
-    "if (gl_FrontFacing) {" +
+   // "if (gl_FrontFacing) {" +
 
        " diffuse = max(dot(vNormal, lightVector), 0.0);" +
-    "} else {" +
-        "diffuse = max(dot(-vNormal, lightVector), 0.0);" +
-    "}"+
-                    "diffuse = diffuse * (1.0 / (1.0 + (0.10 * distance)));" +
+  //  "} else {" +
+   //     "diffuse = max(dot(-vNormal, lightVector), 0.0);" +
+  //  "}"+
+                //    "diffuse = diffuse * (1.0 / (1.0 + (0.10 * distance)));" +
                     " diffuse = diffuse + 0.3; " +
 
 
@@ -278,11 +278,11 @@ public class ColladaParser {
                             //int j  = id;
                             //   Log.d("j is " , Integer.toString(j));
                             geometries.get(geometries.size() - 1).vertices[k++] = geometries.get(geometries.size() - 1).positions[id * 3];
-                            geometries.get(geometries.size() - 1).vertices[k++] = geometries.get(geometries.size() - 1).positions[id * 3 + 1];
                             geometries.get(geometries.size() - 1).vertices[k++] = geometries.get(geometries.size() - 1).positions[id * 3 + 2];
+                            geometries.get(geometries.size() - 1).vertices[k++] = geometries.get(geometries.size() - 1).positions[id * 3 + 1];
                             geometries.get(geometries.size() - 1).normals2[z++] = geometries.get(geometries.size() -1 ).normals[id2 * 3];
-                            geometries.get(geometries.size() - 1).normals2[z++] = geometries.get(geometries.size() -1 ).normals[id2 * 3 + 1];
                             geometries.get(geometries.size() - 1).normals2[z++] = geometries.get(geometries.size() -1 ).normals[id2 * 3 + 2];
+                            geometries.get(geometries.size() - 1).normals2[z++] = geometries.get(geometries.size() -1 ).normals[id2 * 3 + 1];
                             //id = Integer.parseInt(scan.next());
                             //  Log.d("j is " , Integer.toString(count * 9) + " " +  Integer.toString(id) + " " + Integer.toString(geometries.size()) + " " + Integer.toString(geometries.get(geometries.size() - 1).vertices.length) + " " + Integer.toString(geometries.get(geometries.size() - 1).positions.length));
 
@@ -717,7 +717,7 @@ public class ColladaParser {
 
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
-        GLES20.glEnableVertexAttribArray(mNormalHandle);
+
 
         // Prepare the triangle coordinate data
         for(int i = 0; i < geometries.size(); i++) {
@@ -726,13 +726,13 @@ public class ColladaParser {
             Matrix.translateM(identity, 0, geometries.get(i).translate[0], geometries.get(i).translate[1], geometries.get(i).translate[2]);
             Matrix.multiplyMM(worlds.get(i), 0, identity, 0, modelMatrix, 0);
           //  Matrix.multiplyMM(temp, 0, modelMatrix, 0, worlds.get(i), 0);
-            Matrix.multiplyMM(mVMatrix, 0, worlds.get(i), 0, viewMatrix, 0);
+            Matrix.multiplyMM(mVMatrix, 0, viewMatrix, 0, identity, 0);
             Matrix.multiplyMM(mVPMatrix, 0, mvpMatrix, 0, worlds.get(i), 0);
             GLES20.glVertexAttribPointer(
                     mPositionHandle, 3,
                     GLES20.GL_FLOAT, false,
                     0, geometries.get(i).vertexBuffer);
-
+            GLES20.glEnableVertexAttribArray(mNormalHandle);
             GLES20.glVertexAttribPointer(
                     mNormalHandle, 3,
                     GLES20.GL_FLOAT, false,
@@ -772,7 +772,7 @@ public class ColladaParser {
 
 
             GLES20.glUniformMatrix4fv(mMVMatrixHandle, 1, false, mVMatrix, 0);
-            GLES20.glVertexAttrib3f(mLightPosHandle, 0.0f, 50.0f, 0.0f);
+            GLES20.glVertexAttrib3f(mLightPosHandle, -2.0f, -5.0f, 11.0f);
             // Apply the projection and view transformation
             GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mVPMatrix, 0);
             MyGLRenderer.checkGlError("glUniformMatrix4fv");
