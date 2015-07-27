@@ -46,6 +46,7 @@ public class ColladaParser {
 
         String sourceName;
         String name;
+        public boolean picked = false;
         public FloatBuffer vertexBuffer;
         public FloatBuffer normalBuffer;
         public int positionAttribute;
@@ -87,7 +88,8 @@ public class ColladaParser {
     private final float[] mVPMatrix = new float[16];
 
 
-    ArrayList<Geometry> geometries = new ArrayList<Geometry>();
+    public ArrayList<Geometry> geometries = new ArrayList<Geometry>();
+
 
 
     private final String vertexShaderCode =
@@ -115,6 +117,24 @@ public class ColladaParser {
                     "  gl_Position = uMVPMatrix * aPosition;" +
                     "}";
 
+    final String pointVertexShader =
+            "uniform mat4 u_MVPMatrix;      \n"
+                    + "attribute vec4 a_Position;     \n"
+                    + "void main()                    \n"
+                    + "{                              \n"
+                    + "   gl_Position = u_MVPMatrix   \n"
+                    + "               * a_Position;   \n"
+                    + "   gl_PointSize = 5.0;         \n"
+                    + "}                              \n";
+
+    final String pointFragmentShader =
+            "precision mediump float;       \n"
+                    + "void main()                    \n"
+                    + "{                              \n"
+                    + "   gl_FragColor = vec4(1.0,    \n"
+                    + "   1.0, 1.0, 1.0);             \n"
+                    + "}                              \n";
+
     private final String fragmentShaderCode =
             "precision mediump float;" +
                     "uniform vec3 lightPos;" +
@@ -130,13 +150,13 @@ public class ColladaParser {
                     "float diffuse;" +
    // "if (gl_FrontFacing) {" +
 
-       " diffuse = max(dot(vNormal, lightVector), 0.0);" +
+       " diffuse = max(dot(vNormal, lightVector), 0.1);" +
   //  "} else {" +
    //     "diffuse = max(dot(-vNormal, lightVector), 0.0);" +
   //  "}"+
-                //    "diffuse = diffuse * (1.0 / (1.0 + (0.10 * distance)));" +
-                    " diffuse = diffuse + 0.3; " +
-
+                    "diffuse = diffuse * (1.0 / (1.0 + (0.10 * distance)));" +
+                   " diffuse = diffuse + 0.3; " +
+                 //   "   diffuse = diffuse * 100.0 * (1.0 / (1.0 + (0.25 * distance * distance)));"  +
 
 
 
@@ -696,6 +716,23 @@ public class ColladaParser {
         Matrix.setRotateM(modelMatrix, 0, mAngle, 0f, 1f, 1f);
         float identity[] = new float[16];
 
+        float lightPos[] = new float[4];
+
+        lightPos[0] = 0.0f;
+        lightPos[1] = 20.0f;
+        lightPos[2] = 20.0f;
+        lightPos[3] = 1.0f;
+        float lightPos2[] = new float[4];
+        Matrix.multiplyMV(lightPos2, 0, viewMatrix, 0, lightPos, 0);
+
+        float tempLightPos[] = new float[3];
+
+        tempLightPos[0] = lightPos2[0]/lightPos2[3];
+        tempLightPos[1] = lightPos2[1]/lightPos2[3];
+        tempLightPos[2] = lightPos2[2]/lightPos2[3];
+
+        Log.d("TLP", Float.toString(tempLightPos[0]) + " " + Float.toString(tempLightPos[1]) + " " + Float.toString(tempLightPos[2]));
+
         for (int i = 0; i < geometries.size(); i++)
             worlds.add(new   float[16]);
 
@@ -721,6 +758,7 @@ public class ColladaParser {
 
         // Prepare the triangle coordinate data
         for(int i = 0; i < geometries.size(); i++) {
+          //  Log.d("picked", Boolean.toString(geometries.get(i).picked));
             float[] temp = new float[16];
             Matrix.setIdentityM(identity, 0);
             Matrix.translateM(identity, 0, geometries.get(i).translate[0], geometries.get(i).translate[1], geometries.get(i).translate[2]);
@@ -732,6 +770,7 @@ public class ColladaParser {
                     mPositionHandle, 3,
                     GLES20.GL_FLOAT, false,
                     0, geometries.get(i).vertexBuffer);
+
             GLES20.glEnableVertexAttribArray(mNormalHandle);
             GLES20.glVertexAttribPointer(
                     mNormalHandle, 3,
@@ -770,9 +809,14 @@ public class ColladaParser {
 
            // GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 
+            if(geometries.get(i).picked == true)
+                GLES20.glUniform4f(mColorHandle, 0.0f, 0.0f, 0.0f, 1.0f);
+           //// if(geometries.get(i).picked == false)
+          //      GLES20.glUniform4f(mColorHandle, 1.0f, 1.0f, 1.0f, 1.0f);
+
 
             GLES20.glUniformMatrix4fv(mMVMatrixHandle, 1, false, mVMatrix, 0);
-            GLES20.glVertexAttrib3f(mLightPosHandle, -2.0f, -5.0f, 11.0f);
+            GLES20.glUniform3fv(mLightPosHandle, 1, tempLightPos, 0);
             // Apply the projection and view transformation
             GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mVPMatrix, 0);
             MyGLRenderer.checkGlError("glUniformMatrix4fv");

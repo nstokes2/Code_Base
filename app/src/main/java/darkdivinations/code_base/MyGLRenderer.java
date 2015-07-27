@@ -44,23 +44,29 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = "MyGLRenderer";
     private Triangle mTriangle;
     private Square   mSquare;
-    private ColladaParser cParser;
+    public ColladaParser cParser;
     public Context context;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
-    private final float[] projectionMatrix = new float[16];
-    private final float[] viewMatrix = new float[16];
+    public float[] projectionMatrix = new float[16];
+     public  float[] viewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
-
+    public int[] viewport= new int[4];
     private float mAngle;
+    public float x=0;
+    public float y=0;
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
         // Set the background frame color
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+// Use culling to remove back faces.
+       // GLES20.glEnable(GLES20.GL_CULL_FACE);
 
+// Enable depth testing
+       // GLES20.glEnable(GLES20.GL_DEPTH_TEST);
      //   mTriangle = new Triangle();
       //  mSquare   = new Square();
         cParser = new ColladaParser(context);
@@ -111,7 +117,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         float aspectRatio = (float) width / height;
 
-
+ viewport[0] = 0;
+        viewport[1] = 0;
+        viewport[2] = width;
+        viewport[3] = height;
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
      //   Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
