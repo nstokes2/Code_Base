@@ -18,17 +18,19 @@ package darkdivinations.code_base;
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.media.MediaPlayer;
 
 public class OpenGLES20Activity extends Activity {
 
     private GLSurfaceView mGLView;
-
+    public MediaPlayer mediaP;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Create a GLSurfaceView instance and set it
         // as the ContentView for this Activity
+
         mGLView = new MyGLSurfaceView(this);
         setContentView(mGLView);
     }

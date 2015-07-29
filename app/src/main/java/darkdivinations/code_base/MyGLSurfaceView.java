@@ -46,7 +46,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
         setRenderer(mRenderer);
 
         // Render the view only when there is a change in the drawing data
-       // setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
     private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
@@ -75,7 +75,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
         far[2] = -temp2[1]/temp2[3];
 
 
-        Log.d("up", Float.toString(far[0]) + " " + Float.toString(far[1]) + " " + Float.toString(far[2]));
+     //   Log.d("up", Float.toString(far[0]) + " " + Float.toString(far[1]) + " " + Float.toString(far[2]));
         GLU.gluUnProject(x, y, 1.0f, mRenderer.viewMatrix, 0, mRenderer.projectionMatrix, 0, mRenderer.viewport, 0, temp, 0);
         Matrix.multiplyMV(temp2, 0, mRenderer.viewMatrix, 0, temp, 0);
 
@@ -95,8 +95,8 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 float[] rDir, rW0, rW;
                 float r, a, b;
                 boolean picked = false;
-
-            for(int i = 0; i< mRenderer.cParser.geometries.get(0).triangleCount*3; i+=9) {
+                for(int j = 0; j<mRenderer.cParser.geometries.size(); j++)
+            for(int i = 0; i< mRenderer.cParser.geometries.get(j).triangleCount*3; i+=9) {
             picked = true;
                 float [] a0 = new float[4];
                 float [] a1 = new float[4];
@@ -108,20 +108,20 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 float [] v1 = new float[3];
                 float [] v2 = new float[3];
 
-                a0[0]= mRenderer.cParser.geometries.get(0).vertices[i];
-                a0[1]= mRenderer.cParser.geometries.get(0).vertices[i+1];
-                a0[2]= mRenderer.cParser.geometries.get(0).vertices[i+2];
+                a0[0]= mRenderer.cParser.geometries.get(j).vertices[i];
+                a0[1]= mRenderer.cParser.geometries.get(j).vertices[i+1];
+                a0[2]= mRenderer.cParser.geometries.get(j).vertices[i+2];
                 a0[3] = 1;
 
 
-                a1[0]= mRenderer.cParser.geometries.get(0).vertices[i+3];
-                a1[1]= mRenderer.cParser.geometries.get(0).vertices[i+4];
-                a1[2]= mRenderer.cParser.geometries.get(0).vertices[i+5];
+                a1[0]= mRenderer.cParser.geometries.get(j).vertices[i+3];
+                a1[1]= mRenderer.cParser.geometries.get(j).vertices[i+4];
+                a1[2]= mRenderer.cParser.geometries.get(j).vertices[i+5];
                 a1[3] = 1;
 
-                a2[0]= mRenderer.cParser.geometries.get(0).vertices[i+6];
-                a2[1]= mRenderer.cParser.geometries.get(0).vertices[i+7];
-                a2[2]= mRenderer.cParser.geometries.get(0).vertices[i+8];
+                a2[0]= mRenderer.cParser.geometries.get(j).vertices[i+6];
+                a2[1]= mRenderer.cParser.geometries.get(j).vertices[i+7];
+                a2[2]= mRenderer.cParser.geometries.get(j).vertices[i+8];
                 a2[3] = 1;
             float [] mixedMatrix  =new float[16];
 
@@ -129,7 +129,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 Matrix.setIdentityM(identity, 0);
                 float[] mVMatrix = new float[16];
 
-                Matrix.translateM(identity, 0, mRenderer.cParser.geometries.get(0).translate[0], mRenderer.cParser.geometries.get(0).translate[1], mRenderer.cParser.geometries.get(0).translate[2]);
+                Matrix.translateM(identity, 0, mRenderer.cParser.geometries.get(j).translate[0], mRenderer.cParser.geometries.get(j).translate[1], mRenderer.cParser.geometries.get(j).translate[2]);
                 Matrix.multiplyMM(mVMatrix, 0, mRenderer.viewMatrix, 0, identity, 0);
                 Matrix.multiplyMV(b0, 0, mVMatrix, 0, a0, 0);
                 Matrix.multiplyMV(b1, 0, mVMatrix, 0, a1, 0);
@@ -147,9 +147,9 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 v2[1] = b2[1]/b2[3];
                 v2[2] = b2[2]/b2[3];
 
-                    Log.d("v0", Float.toString(v0[0]) + " " + Float.toString(v0[1]) + " " + Float.toString(v0[2]));
-                Log.d("v1", Float.toString(v1[0]) + " " + Float.toString(v1[1]) + " " + Float.toString(v1[2]));
-                Log.d("v2", Float.toString(v2[0]) + " " + Float.toString(v2[1]) + " " + Float.toString(v2[2]));
+         //           Log.d("v0", Float.toString(v0[0]) + " " + Float.toString(v0[1]) + " " + Float.toString(v0[2]));
+          //      Log.d("v1", Float.toString(v1[0]) + " " + Float.toString(v1[1]) + " " + Float.toString(v1[2]));
+           //     Log.d("v2", Float.toString(v2[0]) + " " + Float.toString(v2[1]) + " " + Float.toString(v2[2]));
 
 
                 uT = myVector.minus(v1, v0);
@@ -157,7 +157,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 nT = myVector.crossProduct(uT, vT);
 
                 if(nT.equals(new float[]{0.0f,  0.0f, 0.0f})) {
-                    Log.d("degenerate", "Degenerate");
+                  //  Log.d("degenerate", "Degenerate");
 
 
                 }
@@ -186,6 +186,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                     I[1] = tempI[1];
                     I[2] = tempI[2];
 
+            Log.d("This is the I", Float.toString(I[0])+ " " + Float.toString(I[1]) + " " + Float.toString(I[2]));
 
                     float uu, uv, vv, wu, wv, D;
                     uu = myVector.dot(uT,uT);
@@ -205,11 +206,11 @@ public class MyGLSurfaceView extends GLSurfaceView {
                        picked = false;
 
                     if(picked)
-                    mRenderer.cParser.geometries.get(0).picked = true;
+                    mRenderer.cParser.geometries.get(j).picked = true;
                     else {
                         //if one triangle picked dontunpick
-                        if(mRenderer.cParser.geometries.get(0).picked == false)
-                        mRenderer.cParser.geometries.get(0).picked = false;
+                        if(mRenderer.cParser.geometries.get(j).picked == false)
+                        mRenderer.cParser.geometries.get(j).picked = false;
 
                     }
 
@@ -247,6 +248,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                 Log.d("actionup", "AU");
                 mPreviousX = x;
                 mPreviousY = y;
+                requestRender();
                 return true;
         }
 
