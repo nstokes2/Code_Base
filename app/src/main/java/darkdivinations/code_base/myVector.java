@@ -4,6 +4,41 @@ package darkdivinations.code_base;
  * Created by nathan on 7/24/2015.
  */
 public class  myVector {
+    public static double distance2(myVector v1, myVector v2)
+    {
+
+        double distance2= Math.sqrt(((v1.x - v2.x) * (v1.x - v2.x)) + ((v1.y - v2.y)* (v1.y - v2.y)));
+
+        return distance2;
+
+    }
+    public static double distance(myVector v1, myVector v2)
+    {
+       double distance2= Math.sqrt(((v1.x - v2.x) * (v1.x - v2.x)) + ((v1.y - v2.y)* (v1.y - v2.y)) + ((v1.z - v2.z) * (v1.z - v2.z)));
+
+return distance2;
+
+    }
+    public myVector(float [] che)
+    {
+
+        x = che[0];
+        y = che[1];
+        z = che[2];
+
+
+
+    }
+    public myVector(float x1, float y1, float z1)
+    {
+
+        x = x1;
+        y = y1;
+        z = z1;
+
+
+
+    }
     // dot product (3D) which allows vector operations in arguments
     public static float dot(float[] u,float[] v) {
         return ((u[X] * v[X]) + (u[Y] * v[Y]) + (u[Z] * v[Z]));
@@ -26,6 +61,10 @@ public class  myVector {
     public static float length(float[] u){
         return (float) Math.abs(Math.sqrt((u[X] *u[X]) + (u[Y] *u[Y]) + (u[Z] *u[Z])));
     }
+
+    public float x;
+    public float y;
+    public float z;
 
     public static final int X = 0;
     public static final int Y = 1;

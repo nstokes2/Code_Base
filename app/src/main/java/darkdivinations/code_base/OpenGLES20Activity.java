@@ -19,19 +19,38 @@ import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.media.MediaPlayer;
+import android.R.*;
 
 public class OpenGLES20Activity extends Activity {
 
     private GLSurfaceView mGLView;
     public MediaPlayer mediaP;
+
+    public class myMedia{
+       public int duration;
+        public int position;
+        public MediaPlayer mediaP;
+
+        public myMedia(MediaPlayer media){
+            duration = 0; position = 0;
+            mediaP = media;
+            duration = mediaP.getDuration();
+           // mediaP.
+        }
+
+
+    }
+    myMedia jiggy;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Create a GLSurfaceView instance and set it
         // as the ContentView for this Activity
-
-        mGLView = new MyGLSurfaceView(this);
+        mediaP = MediaPlayer.create(this, R.raw.stand_for);
+        jiggy = new myMedia(mediaP);
+        mGLView = new MyGLSurfaceView(this, jiggy);
         setContentView(mGLView);
     }
 

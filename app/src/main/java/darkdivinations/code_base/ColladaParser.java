@@ -713,7 +713,8 @@ public class ColladaParser {
         mAngle = angle;
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
-        Matrix.setRotateM(modelMatrix, 0, mAngle, 0f, 1f, 1f);
+        //Matrix.setRotateM(modelMatrix, 0, mAngle, 0f, 1f, 1f);
+        Matrix.setIdentityM(modelMatrix, 0);
         float identity[] = new float[16];
 
         float lightPos[] = new float[4];

@@ -21,6 +21,7 @@ import android.opengl.Matrix;
 import android.view.MotionEvent;
 import android.opengl.GLU;
 import android.util.Log;
+import android.media.MediaPlayer;
 
 
 /**
@@ -33,11 +34,14 @@ import android.util.Log;
 public class MyGLSurfaceView extends GLSurfaceView {
 
     private final MyGLRenderer mRenderer;
+    public Context context;
+    OpenGLES20Activity.myMedia mediaP;
 
 
-    public MyGLSurfaceView(Context context) {
-        super(context);
-
+    public MyGLSurfaceView(Context contexta, OpenGLES20Activity.myMedia mediap) {
+        super(contexta);
+    context = contexta;
+        mediaP = mediap;
         // Create an OpenGL ES 2.0 context.
         setEGLContextClientVersion(2);
 
@@ -53,6 +57,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
     private float mPreviousX;
     private float mPreviousY;
     public static  float smallNum = 0.00000001f;
+    public static boolean play = false;
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent e) {
@@ -186,7 +191,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                     I[1] = tempI[1];
                     I[2] = tempI[2];
 
-            Log.d("This is the I", Float.toString(I[0])+ " " + Float.toString(I[1]) + " " + Float.toString(I[2]));
+           // Log.d("This is the I", Float.toString(I[0])+ " " + Float.toString(I[1]) + " " + Float.toString(I[2]));
 
                     float uu, uv, vv, wu, wv, D;
                     uu = myVector.dot(uT,uT);
@@ -205,8 +210,82 @@ public class MyGLSurfaceView extends GLSurfaceView {
                     if(t < 0.0f || (s + t) > 1.0f)
                        picked = false;
 
-                    if(picked)
-                    mRenderer.cParser.geometries.get(j).picked = true;
+                    if(picked) {
+
+                        if(j==1)
+                        {
+                            myVector vec1 = new myVector(mRenderer.cParser.geometries.get(j).translate);
+                            myVector vec2 = new myVector(I);
+                            double distance = myVector.distance2(vec1, vec2);
+                            int sector = 0;
+                            Log.d("This is the I", Float.toString(I[0])+ " " + Float.toString(I[1]) + " " + Float.toString(I[2]));
+
+                            Log.d("This is the translate", Float.toString(mRenderer.cParser.geometries.get(j).translate[0])+ " " + Float.toString(mRenderer.cParser.geometries.get(j).translate[1]) + " " + Float.toString(mRenderer.cParser.geometries.get(j).translate[2]));
+                            Log.d("This is the distance", Double.toString(distance));
+                            if(distance >= 0 && distance <= 1)
+                                sector = 0;
+                            if(distance >= 1 && distance <= 2)
+                                sector = 1;
+                            if(distance >= 2 && distance <= 3)
+                                sector = 2;
+                            if(distance >= 3 && distance <= 4)
+                                sector = 3;
+                            if(distance >= 4 && distance <= 5)
+                                sector = 4;
+                            if(distance >= 5 && distance <= 6)
+                                sector = 5;
+                            if(distance >= 6 && distance <= 7)
+                                sector = 6;
+                            if(distance >= 7 && distance <= 8)
+                                sector = 7;
+                            if(distance >= 8 && distance <= 9)
+                                sector = 8;
+                            if(distance >= 9 && distance <= 10)
+                                sector = 9;
+                            if(distance >= 10 && distance <= 11)
+                                sector = 10;
+                            if(distance >= 11 && distance <= 12)
+                                sector = 11;
+                            if(distance >= 12 && distance <= 13)
+                                sector = 11;
+float circumference = 2 * 3.14f * sector;
+
+                            float dotP = myVector.dot(mRenderer.cParser.geometries.get(j).translate, I);
+                            float length1 = myVector.length(mRenderer.cParser.geometries.get(j).translate);
+                            float length2 = myVector.length(I);
+                            double angle = Math.acos((dotP / (length1 * length2)));
+Log.d("angle", Double.toString(angle));
+
+                            double slice = angle/3.14;
+                            slice = slice * 100;
+
+                            Log.d("slice", Double.toString(slice));
+                            Log.d("sector", Double.toString(sector));
+                            double seekTo = mediaP.duration / sector / slice;
+                            int seekToI = (int)Math.floor(seekTo);
+                            Log.d("", Integer.toString(seekToI));
+
+
+                        }
+                        if(j==2) {
+                            if (!play & !mRenderer.cParser.geometries.get(j).picked) {
+
+
+                                play = true;
+                              //  mediaP.mediaP.start();
+
+                                // context.
+
+                            } else if (play & !mRenderer.cParser.geometries.get(j).picked) {
+                                play = false;
+                           //     mediaP.mediaP.pause();
+
+                            }
+                        }
+                        else
+                            mRenderer.cParser.geometries.get(j).picked = true;
+
+                    }
                     else {
                         //if one triangle picked dontunpick
                         if(mRenderer.cParser.geometries.get(j).picked == false)
@@ -245,7 +324,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
                     mRenderer.cParser.geometries.get(i).picked = false;
                 //    Log.d("is it false", Boolean.toString( mRenderer.cParser.geometries.get(i).picked));
                 }
-                Log.d("actionup", "AU");
+              //  Log.d("actionup", "AU");
                 mPreviousX = x;
                 mPreviousY = y;
                 requestRender();
