@@ -44,6 +44,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = "MyGLRenderer";
     private Triangle mTriangle;
     private Square   mSquare;
+    public IntersectableLine iL;
     public ColladaParser cParser;
     public Context context;
 
@@ -70,6 +71,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
      //   mTriangle = new Triangle();
       //  mSquare   = new Square();
         cParser = new ColladaParser(context);
+        iL = new IntersectableLine(6, 10, 10);
     }
 
     @Override
@@ -80,7 +82,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // Set the camera position (View matrix)
-        Matrix.setLookAtM(viewMatrix, 0, 0, 15f, 0f, 0, 6f, -15f, 0f, 1f, 0f);
+        Matrix.setLookAtM(viewMatrix, 0, 0, 10f, 0f, 0, 0f, -10f, 0f, 1f, 0f);
 
 
         // Calculate the projection and view transformation
@@ -88,8 +90,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Draw square
        // mSquare.draw(mMVPMatrix);
+        iL.draw(mMVPMatrix, mAngle, viewMatrix);
+        float pointAngle = 0.0f;
+        cParser.draw(mMVPMatrix, mAngle, viewMatrix, pointAngle);
 
-        cParser.draw(mMVPMatrix, mAngle, viewMatrix);
 
         // Create a rotation for the triangle
 
@@ -127,10 +131,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         if (width > height) {
 // Landscape
-            orthoM(projectionMatrix, 0, -aspectRatio  * 20, aspectRatio * 20, -20f, 20f, -20f,20f);
+            orthoM(projectionMatrix, 0, -aspectRatio  * 10, aspectRatio * 10, -10f, 10f, -10f,10f);
         } else {
 // Portrait or square
-            orthoM(projectionMatrix, 0, -20f, 20f, -aspectRatio  * 20, aspectRatio * 20, -20f, 20f);
+            orthoM(projectionMatrix, 0, -10f, 10f, -aspectRatio  * 10, aspectRatio * 10, -10f, 10f);
         }
 
 

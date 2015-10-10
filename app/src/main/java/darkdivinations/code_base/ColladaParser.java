@@ -69,7 +69,8 @@ public class ColladaParser {
 
         }
     }
-
+    public Float elapsedTime= null;
+    public boolean start = false;
     private final int mProgram;
     private int mPositionHandle;
     private int mColorHandle;
@@ -299,7 +300,7 @@ public class ColladaParser {
                             //   Log.d("j is " , Integer.toString(j));
                             geometries.get(geometries.size() - 1).vertices[k++] = geometries.get(geometries.size() - 1).positions[id * 3];
                             geometries.get(geometries.size() - 1).vertices[k++] = geometries.get(geometries.size() - 1).positions[id * 3 + 2];
-                            geometries.get(geometries.size() - 1).vertices[k++] = geometries.get(geometries.size() - 1).positions[id * 3 + 1];
+                            geometries.get(geometries.size() - 1).vertices[k++] = -geometries.get(geometries.size() - 1).positions[id * 3 + 1];
                             geometries.get(geometries.size() - 1).normals2[z++] = geometries.get(geometries.size() -1 ).normals[id2 * 3];
                             geometries.get(geometries.size() - 1).normals2[z++] = geometries.get(geometries.size() -1 ).normals[id2 * 3 + 2];
                             geometries.get(geometries.size() - 1).normals2[z++] = geometries.get(geometries.size() -1 ).normals[id2 * 3 + 1];
@@ -612,10 +613,10 @@ public class ColladaParser {
 
     public ColladaParser(Context context) {
 
-
+elapsedTime = 0.0f;
         try {
-            InputStream in = context.getAssets().open("mydj.DAE");
-
+            //InputStream in = context.getAssets().open("mydj.DAE");
+            InputStream in = context.getAssets().open("djtable2.DAE");
             scan = new Scanner((in));
 
             String line;
@@ -709,7 +710,7 @@ public class ColladaParser {
     public float getAngle2() {return mAngle2;}
     public void setAngle2(float angle) {mAngle2 = angle;}
 
-    public void draw(float[] mvpMatrix, float angle, float[] viewMatrix) {
+    public void draw(float[] mvpMatrix, float angle, float[] viewMatrix, float pAngle) {
         mAngle = angle;
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
@@ -732,7 +733,7 @@ public class ColladaParser {
         tempLightPos[1] = lightPos2[1]/lightPos2[3];
         tempLightPos[2] = lightPos2[2]/lightPos2[3];
 
-        Log.d("TLP", Float.toString(tempLightPos[0]) + " " + Float.toString(tempLightPos[1]) + " " + Float.toString(tempLightPos[2]));
+      //  Log.d("TLP", Float.toString(tempLightPos[0]) + " " + Float.toString(tempLightPos[1]) + " " + Float.toString(tempLightPos[2]));
 
         for (int i = 0; i < geometries.size(); i++)
             worlds.add(new   float[16]);
@@ -761,8 +762,13 @@ public class ColladaParser {
         for(int i = 0; i < geometries.size(); i++) {
           //  Log.d("picked", Boolean.toString(geometries.get(i).picked));
             float[] temp = new float[16];
+
+
             Matrix.setIdentityM(identity, 0);
             Matrix.translateM(identity, 0, geometries.get(i).translate[0], geometries.get(i).translate[1], geometries.get(i).translate[2]);
+
+            if(i==2)
+                Matrix.rotateM(identity, 0, elapsedTime, 0, 1,0);
             Matrix.multiplyMM(worlds.get(i), 0, identity, 0, modelMatrix, 0);
           //  Matrix.multiplyMM(temp, 0, modelMatrix, 0, worlds.get(i), 0);
             Matrix.multiplyMM(mVMatrix, 0, viewMatrix, 0, identity, 0);

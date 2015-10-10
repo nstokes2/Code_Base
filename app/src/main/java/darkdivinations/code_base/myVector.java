@@ -7,10 +7,13 @@ public class  myVector {
     public static double distance2(myVector v1, myVector v2)
     {
 
-        double distance2= Math.sqrt(((v1.x - v2.x) * (v1.x - v2.x)) + ((v1.y - v2.y)* (v1.y - v2.y)));
+        double distance2= Math.sqrt(((v1.x - v2.x) * (v1.x - v2.x)) + ((v1.z - v2.z)* (v1.z - v2.z)));
 
         return distance2;
 
+    }
+    public static float length2(float[] u){
+        return (float) Math.abs(Math.sqrt((u[X] *u[X]) + (u[Z] *u[Z])));
     }
     public static double distance(myVector v1, myVector v2)
     {
@@ -18,6 +21,9 @@ public class  myVector {
 
 return distance2;
 
+    }
+    public static float dot2(float[] u,float[] v) {
+        return ((u[X] * v[X]) +  (u[Z] * v[Z]));
     }
     public myVector(float [] che)
     {
